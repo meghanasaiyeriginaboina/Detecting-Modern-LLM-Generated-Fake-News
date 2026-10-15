@@ -1,0 +1,13 @@
+Model,Param,Val F1
+LogReg (TF-IDF),1.0,0.9602
+LogReg (TF-IDF),10.0,0.9697
+LogReg (TF-IDF),100.0,0.972
+Linear SVM (TF-IDF),0.1,0.9648
+Linear SVM (TF-IDF),0.5,0.9717
+Linear SVM (TF-IDF),2.0,0.9733
+SGD-Huber (TF-IDF),0.0,0.9734
+SGD-Huber (TF-IDF),0.0,0.9725
+SGD-Huber (TF-IDF),0.0001,0.9716
+Compl. NB (TF-IDF),0.1,0.9352
+Compl. NB (TF-IDF),0.3,0.9335
+Compl. NB (TF-IDF),1.0,0.9313

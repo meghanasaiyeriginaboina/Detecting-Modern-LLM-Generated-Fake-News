@@ -1,0 +1,3 @@
+Best in-distribution detector: Linear SVM (TF-IDF) (test F1=0.979, AUC=0.997).
+Largest perturbation drop: 'First 50 words only' (mean F1 0.954 vs 0.972 unperturbed).
+Length: F1 0.847 with 10 words vs 0.972 with full text.

@@ -1,0 +1,1 @@
+Set-Content .gitignore -Encoding ascii -Value "__pycache__/","*.pyc","venv/",".vscode/",".ipynb_checkpoints/","outputs/data/splits.pkl"

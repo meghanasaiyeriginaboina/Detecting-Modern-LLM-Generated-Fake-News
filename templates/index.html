@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Fake News Detector</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="dot"></span>Fake News Detector</div>
+  <nav id="tabs">
+    <button class="tab active" data-tab="detect">Detector</button>
+    <button class="tab" data-tab="compare">Compare models</button>
+    <button class="tab" data-tab="results">Results</button>
+    <button class="tab" data-tab="about">About</button>
+  </nav>
+</header>
+
+<main>
+  <section id="detect" class="panel active">
+    <h1>Is this article real or fake?</h1>
+    <p class="sub">Paste a headline and article. Trained on news articles; fake is the positive class.</p>
+    <div class="grid">
+      <div class="card">
+        <label for="title">Headline <span class="opt">(optional)</span></label>
+        <input id="title" type="text" placeholder="e.g. Senate passes new budget bill">
+        <label for="text">Article text</label>
+        <textarea id="text" rows="12" placeholder="Paste the full article here…"></textarea>
+        <div class="row">
+          <select id="model">{% for m in models %}<option>{{ m }}</option>{% endfor %}</select>
+          <span id="wc" class="muted">0 words</span>
+          <button id="go" class="primary">Analyze</button>
+        </div>
+        <div class="row small">
+          <button class="link" id="ex-real">Load sample 1</button>
+          <button class="link" id="ex-fake">Load sample 2</button>
+          <button class="link" id="clear">Clear</button>
+        </div>
+        <div id="err" class="error" hidden></div>
+      </div>
+
+      <div class="card result" id="resCard">
+        <div class="placeholder" id="resPlaceholder">Your result will appear here.</div>
+        <div id="resBody" hidden>
+          <svg viewBox="0 0 200 120" class="gauge">
+            <path d="M20 100 A80 80 0 0 1 180 100" class="g-bg" pathLength="100"/>
+            <path d="M20 100 A80 80 0 0 1 180 100" class="g-fg" id="gArc" pathLength="100" stroke-dasharray="0 100"/>
+            <text x="100" y="92" id="gPct" class="g-pct" text-anchor="middle">0%</text>
+            <text x="100" y="112" class="g-lbl" text-anchor="middle">probability of fake</text>
+          </svg>
+          <div id="verdict" class="verdict">—</div>
+          <div id="warn" class="warn" hidden></div>
+          <div id="expl" hidden>
+            <h3>What drove this</h3>
+            <div class="cols">
+              <div><h4 class="fk">Pushes toward FAKE</h4><ul id="exFake"></ul></div>
+              <div><h4 class="rl">Pushes toward REAL</h4><ul id="exReal"></ul></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" class="panel">
+    <h1>Compare all detectors</h1>
+    <p class="sub">Runs the same article through every trained model. Uses the headline and text from the Detector tab.</p>
+    <div class="card">
+      <button id="goCmp" class="primary">Run all models</button>
+      <div id="cmpErr" class="error" hidden></div>
+      <div id="cmpBody" hidden>
+        <div id="cmpSummary" class="summary"></div>
+        <div id="cmpBars"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="panel">
+    <h1>Experiment results</h1>
+    <p class="sub">Tables and figures produced by your notebooks.</p>
+    <div id="resultsBody" class="muted">Loading…</div>
+  </section>
+
+  <section id="about" class="panel">
+    <h1>About this project</h1>
+    <div class="card prose">
+      <p><b>Detecting Modern LLM-Generated Fake News: A Cross-Generator Robustness Study.</b></p>
+      <p>Five detectors (Logistic Regression, Linear SVM, SGD-Huber, Complement NB on TF-IDF word 1–2-grams, and Gradient Boosting on stylometric features) were trained on human news, then stress-tested with noise, perturbations, short texts, and text from several LLM generators.</p>
+      <h3>Limitations</h3>
+      <ul>
+        <li>Short snippets (under ~80 words) are less reliable.</li>
+        <li>Models learn patterns of the training data; a verdict is a statistical estimate, not proof.</li>
+        <li>Source-specific giveaway tokens (e.g. agency names, URLs) are removed before classification.</li>
+        <li>Do not use as the sole basis for judging whether a story is true.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

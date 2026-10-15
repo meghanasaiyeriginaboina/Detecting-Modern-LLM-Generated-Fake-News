@@ -1,0 +1,1 @@
+["\\(?reuters\\)?", "\\bvia\\b", "getty images?", "featured image", "image via", "\\bimage\\b", "\\b(video|watch|breaking)\\b", "read more", "21st century wire", "@\\w+", "https?://\\S+", "\\bpic\\.twitter\\.com\\S*", "\\(\\s*(update|details|images?|video)\\s*\\)"]
