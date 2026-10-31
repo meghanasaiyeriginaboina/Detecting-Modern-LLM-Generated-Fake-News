@@ -1,18 +1,42 @@
 # Detecting Modern LLM-Generated Fake News: A Cross-Generator Robustness Study
 
-A web application and machine-learning study that detects fake news, including text written by large language models, using TF-IDF and stylometric classifiers, and tests how well those detectors hold up across different text generators, noise, and short inputs.
+How well do fake-news detectors trained on human-written news hold up when the fake text is written by a language model? This project trains five classical detectors (TF-IDF and stylometric), stress-tests them against perturbations, short text, and three unseen LLM generators, and ships them in a small Flask web app.
 
-![App screenshot](docs/screenshot.png)
+## Key findings
 
-## Features
+| Question | Result |
+|---|---|
+| Accuracy on in-distribution test data | Linear SVM (TF-IDF) is best: F1 = 0.979, AUC = 0.997 |
+| Zero-shot transfer to LLM-written fakes | Mean F1 = 0.811 and recall = 0.705, against F1 = 0.961 on human-written fakes |
+| Does training on the same generator help? | Yes: +6 to +9 F1 points on that generator, with no loss on human text (F1 stays 0.96) |
+| Does training on *other* generators help? | A little: leave-one-generator-out is about +0.04 F1 over zero-shot on the two well-sampled generators |
+| Robustness to text noise | Lowercasing, typos, word dropout and sentence shuffling change F1 by 0.004 or less |
+| Robustness to short text | Mean F1 falls from 0.972 (full text) to 0.847 at 10 words; only trimming to the first 50 words hurts noticeably among the perturbations (mean F1 0.954) |
 
-- **Live detector:** paste a headline and article, choose a model, and get a fake-probability gauge with a REAL/FAKE verdict.
-- **Explainability:** for the linear models, see the words that pushed the score toward fake or real.
-- **Model comparison:** run one article through all five detectors side by side.
-- **Results dashboard:** browse the experiment tables and figures from the notebooks inside the app.
-- **Reliability warning:** flags short texts (under 80 words), where the models are less reliable.
+The pattern behind the zero-shot numbers: precision stays high (0.92 to 1.00) while recall drops to 0.65 to 0.78. The detectors rarely flag real news by mistake, but they miss roughly a quarter to a third of fakes written by an LLM they have never seen, and Qwen2.5-0.5B-Instruct is the hardest generator to catch.
 
-## Models
+<img src="outputs/figures/fig5_cross_generator_heatmap.png" alt="Cross-generator F1 heatmaps" width="100%">
+
+<p>
+  <img src="outputs/figures/fig6_zero_shot_recall.png" alt="Zero-shot recall per generator" width="48%">
+  <img src="outputs/figures/fig8_length_robustness.png" alt="F1 versus text length" width="48%">
+</p>
+
+## Research questions
+
+1. How accurate are TF-IDF and stylometric detectors on clean, held-out news?
+2. How robust are they to text perturbations and to short inputs?
+3. Can a detector trained only on human news catch fake text from an LLM it has never seen (zero-shot transfer)?
+4. Does adding samples from one generator to the training data help against that generator, or against other generators?
+
+## Methodology
+
+1. **Data preparation:** load train, validation and test splits, remove duplicates and cross-split overlap, and scrub source-specific giveaway tokens (agency names, URLs, handles, image credits) so the models cannot rely on them.
+2. **Training:** five detectors, tuned on the validation split. Fake is the positive class (label 0 = fake, 1 = real).
+3. **Test and robustness evaluation:** one pass over the untouched test split, then perturbation and length stress tests.
+4. **Cross-generator detection:** fake news is generated from real fake-news headlines with three open language models (distilgpt2, gpt2, Qwen2.5-0.5B-Instruct). Detectors are evaluated in three settings: human-only training (zero-shot), human plus one generator, and leave-one-generator-out. Every text is truncated to 80 words so length cannot act as a shortcut.
+
+### Models
 
 | Model | Features |
 |---|---|
@@ -22,11 +46,9 @@ A web application and machine-learning study that detects fake news, including t
 | Complement Naive Bayes | TF-IDF word 1–2-grams |
 | Gradient Boosting (HistGB) | Stylometric features (length, capitalization, punctuation, lexical diversity, headline style) |
 
-Fake news is the positive class in all metrics (label 0 = fake, 1 = real).
+## Results
 
-## Results (test set)
-
-Evaluated once on a held-out test split of 8,023 articles after duplicate and leakage removal.
+### In-distribution test set (8,023 articles)
 
 | Model | Accuracy | Precision | Recall | F1 | AUC |
 |---|---|---|---|---|---|
@@ -36,52 +58,49 @@ Evaluated once on a held-out test split of 8,023 articles after duplicate and le
 | Complement NB (TF-IDF) | 0.9425 | 0.9274 | 0.9497 | 0.9384 | 0.9820 |
 | HistGB (Stylometric) | 0.9777 | 0.9749 | 0.9767 | 0.9758 | 0.9983 |
 
-Beyond in-distribution accuracy, the study measures:
+### Cross-generator detection
 
-- **Cross-generator transfer:** detectors trained on human news are tested on text from LLM generators they have never seen, and compared with detectors trained with generator text included.
-- **Robustness:** performance under text perturbations and noise.
-- **Length sensitivity:** F1 as the number of available words shrinks.
+F1 with fake as the positive class. "Zero-shot" means trained on human news only; "+ same generator" adds that generator's texts to training; "leave-one-out" trains on the other generators only.
 
-Figures and tables are in `outputs/figures` and `outputs/tables` and are displayed on the app's **Results** tab.
+| Test generator (fake texts in test set) | Model | Zero-shot F1 | Zero-shot recall | + same generator F1 | Leave-one-out F1 |
+|---|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct (74) | LogReg | 0.762 | 0.649 | 0.844 | 0.800 |
+| Qwen2.5-0.5B-Instruct (74) | Linear SVM | 0.768 | 0.649 | 0.861 | 0.791 |
+| gpt2 (74) | LogReg | 0.827 | 0.743 | 0.894 | 0.878 |
+| gpt2 (74) | Linear SVM | 0.833 | 0.743 | 0.894 | 0.878 |
+| distilgpt2 (9)* | LogReg | 0.875 | 0.778 | 0.875 | 0.941 |
+| distilgpt2 (9)* | Linear SVM | 0.800 | 0.667 | 0.875 | 0.941 |
 
-## Methodology
+On human-written test news the same models score F1 = 0.96 in every setting, so adding generator data does not cost accuracy on human text. \*distilgpt2 has only 18 usable texts, so one article moves its recall by about 11 points; read its rows as indicative only.
 
-1. **Data preparation:** load the data, remove duplicates and train/validation/test overlap, and scrub source-specific giveaway tokens (agency names, URLs, handles) so the models cannot rely on them.
-2. **Training:** hyperparameter tuning on the validation split, then models saved to `outputs/models/phase2_models.joblib`.
-3. **Test and robustness evaluation:** a single pass over the untouched test set, followed by perturbation and length stress tests.
-4. **Cross-generator detection:** LLM-generated fake news is produced with several generators, then evaluated with zero-shot, trained-with-generator, and leave-one-generator-out settings. All texts are truncated to 80 words so article length cannot act as a shortcut.
+### Robustness
 
-## Project structure
+- **Perturbations (TF-IDF models):** lowercase without punctuation, 20% word dropout, 5% typos, shuffled sentences and a removed title all leave F1 within 0.004 of the original (about 0.98 for the best models). Keeping only the first 50 words is the one that hurts (about 0.96).
+- **Length:** F1 drops sharply below 50 words, from about 0.97 at 100 words to about 0.93 at 25 words and 0.80 to 0.91 at 10 words. Complement NB is the weakest on full articles but the most robust at 10 words (F1 0.909, against 0.80 to 0.84 for the others).
 
-```
-.
-├── app.py                 # Flask server and API routes
-├── detector.py            # scrub(), stylometric features, detect(), explain()
-├── templates/index.html   # Web page
-├── static/                # style.css, app.js
-├── outputs/
-│   ├── models/            # phase2_models.joblib
-│   ├── data/              # scrub_patterns.json
-│   ├── tables/            # result CSVs
-│   └── figures/           # result figures
-├── notebooks/             # Data, Train, Test, Detection notebooks
-└── requirements.txt
-```
+## Limitations
 
-## Getting started
+- Texts from the generators are treated as fake by construction, so a detector may be recognizing "machine-written" style as much as "misinformation". This design cannot separate the two.
+- The generators are small open models, not frontier LLMs, and results may not transfer to them.
+- The generated articles are short (about 100 words, cut to 80), and distilgpt2 contributes only 18 usable texts.
+- Results come from a single train/test split, with no confidence intervals, so differences of a few F1 points between settings should not be over-read.
+- Texts under about 80 words are noticeably less reliable.
+- A verdict is a statistical estimate, not proof that a story is true or false.
+
+## Web app demo
+
+A Flask app wraps the trained detectors: paste a headline and article, pick a model, and get a fake-probability gauge and a REAL/FAKE verdict, with the words that drove the score. A comparison tab runs all five models, and a results tab shows the notebook tables and figures.
+
+| Fake article | Real article |
+|---|---|
+| ![Fake example](docs/screenshot.png) | ![Real example](docs/screenshot-real.png) |
 
 ```bash
-git clone https://github.com/meghanasaiyeriginaboina/Detecting-Modern-LLM-Generated-Fake-News.git
-cd Detecting-Modern-LLM-Generated-Fake-News
 pip install -r requirements.txt
 python app.py
 ```
 
-Open <http://localhost:5000> in your browser.
-
-The saved model was trained with **scikit-learn 1.9.0**. Use the same version to avoid loading errors.
-
-## API
+Open <http://localhost:5000>. The saved models were trained with scikit-learn 1.9.0, so use the same version.
 
 | Endpoint | Method | Description |
 |---|---|---|
@@ -89,17 +108,38 @@ The saved model was trained with **scikit-learn 1.9.0**. Use the same version to
 | `/api/compare` | POST | `{title, text}` returns results from all models |
 | `/api/results` | GET | Experiment tables and figure list |
 
-## Limitations
+## Reproducing the experiments
 
-- Predictions are statistical estimates, not proof that a story is true or false.
-- Texts under about 80 words are less reliable.
-- Models reflect the patterns of their training data and may not transfer to new sources or newer LLMs.
-- Do not use this tool as the sole basis for judging the truthfulness of a story.
+Run the notebooks in order from the repo root:
+
+1. `notebooks/1_Data_Preparation.ipynb` (set `DATA_DIR` to the folder with the train, evaluation and test CSVs)
+2. `notebooks/2_Train_Models.ipynb`
+3. `notebooks/3_Test_Evaluation.ipynb`
+4. `notebooks/4_Detection_and_Visualization.ipynb` (set `RUN_GENERATION = True` and `pip install transformers torch` to generate LLM text; a GPU is strongly recommended)
+
+The dataset and the generated texts are not included in this repository.
+
+## Repository structure
+
+```
+.
+├── notebooks/             # the four experiment notebooks
+├── outputs/
+│   ├── models/            # trained detectors (phase2_models.joblib)
+│   ├── data/              # scrub_patterns.json
+│   ├── tables/            # result CSVs
+│   └── figures/           # result figures
+├── app.py                 # Flask server and API routes
+├── detector.py            # scrub(), stylometric features, detect(), explain()
+├── templates/, static/    # web page
+├── docs/                  # screenshots
+└── requirements.txt
+```
 
 ## Tech stack
 
-Python, Flask, scikit-learn, pandas, NumPy, joblib, HTML/CSS/JavaScript.
+Python, scikit-learn, pandas, NumPy, Hugging Face Transformers (generation), Flask, HTML/CSS/JavaScript.
 
 ## Author
 
-**Meghana** — [GitHub](https://github.com/meghanasaiyeriginaboina)
+**Meghana**, [GitHub](https://github.com/meghanasaiyeriginaboina)

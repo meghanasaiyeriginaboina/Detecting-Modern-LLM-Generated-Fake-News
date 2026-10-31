@@ -1,3 +1,5 @@
 Best in-distribution detector: Linear SVM (TF-IDF) (test F1=0.979, AUC=0.997).
 Largest perturbation drop: 'First 50 words only' (mean F1 0.954 vs 0.972 unperturbed).
 Length: F1 0.847 with 10 words vs 0.972 with full text.
+Zero-shot transfer to LLM fakes: mean F1=0.811, recall=0.705 (human in-dist. F1=0.961).
+Leave-one-generator-out: mean F1=0.871 (+0.061 vs zero-shot).

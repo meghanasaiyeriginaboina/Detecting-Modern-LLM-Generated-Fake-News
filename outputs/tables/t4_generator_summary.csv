@@ -1,0 +1,4 @@
+generator,articles,avg_words
+Qwen2.5-0.5B-Instruct,148,104.5
+distilgpt2,18,113.7
+gpt2,148,102.4

@@ -1,0 +1,44 @@
+\begin{tabular}{lllrrrr}
+\toprule
+Model & Training & Test & F1 & Recall & Precision & AUC \\
+\midrule
+LogReg & Human only & Qwen2.5-0.5B-Instruct & 0.7619 & 0.6486 & 0.9231 & 0.9545 \\
+LogReg & Human only & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+LogReg & Human only & gpt2 & 0.8271 & 0.7432 & 0.9322 & 0.9711 \\
+LogReg & Human only & Human (in-dist.) & 0.9598 & 0.9637 & 0.9560 & 0.9930 \\
+LogReg & Human + Qwen2.5-0.5B-Instruct & Qwen2.5-0.5B-Instruct & 0.8444 & 0.7703 & 0.9344 & 0.9759 \\
+LogReg & Human + Qwen2.5-0.5B-Instruct & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+LogReg & Human + Qwen2.5-0.5B-Instruct & gpt2 & 0.8696 & 0.8108 & 0.9375 & 0.9770 \\
+LogReg & Human + Qwen2.5-0.5B-Instruct & Human (in-dist.) & 0.9617 & 0.9680 & 0.9555 & 0.9930 \\
+LogReg & Human + distilgpt2 & Qwen2.5-0.5B-Instruct & 0.7619 & 0.6486 & 0.9231 & 0.9545 \\
+LogReg & Human + distilgpt2 & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+LogReg & Human + distilgpt2 & gpt2 & 0.8444 & 0.7703 & 0.9344 & 0.9730 \\
+LogReg & Human + distilgpt2 & Human (in-dist.) & 0.9606 & 0.9644 & 0.9567 & 0.9930 \\
+LogReg & Human + gpt2 & Qwen2.5-0.5B-Instruct & 0.7907 & 0.6892 & 0.9273 & 0.9571 \\
+LogReg & Human + gpt2 & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+LogReg & Human + gpt2 & gpt2 & 0.8936 & 0.8514 & 0.9403 & 0.9783 \\
+LogReg & Human + gpt2 & Human (in-dist.) & 0.9603 & 0.9658 & 0.9547 & 0.9928 \\
+LogReg & Leave-one-generator-out & Qwen2.5-0.5B-Instruct & 0.8000 & 0.7027 & 0.9286 & 0.9556 \\
+LogReg & Leave-one-generator-out & distilgpt2 & 0.9412 & 0.8889 & 1.0000 & 1.0000 \\
+LogReg & Leave-one-generator-out & gpt2 & 0.8777 & 0.8243 & 0.9385 & 0.9772 \\
+Linear SVM & Human only & Qwen2.5-0.5B-Instruct & 0.7680 & 0.6486 & 0.9412 & 0.9529 \\
+Linear SVM & Human only & distilgpt2 & 0.8000 & 0.6667 & 1.0000 & 1.0000 \\
+Linear SVM & Human only & gpt2 & 0.8333 & 0.7432 & 0.9483 & 0.9706 \\
+Linear SVM & Human only & Human (in-dist.) & 0.9613 & 0.9658 & 0.9568 & 0.9932 \\
+Linear SVM & Human + Qwen2.5-0.5B-Instruct & Qwen2.5-0.5B-Instruct & 0.8613 & 0.7973 & 0.9365 & 0.9730 \\
+Linear SVM & Human + Qwen2.5-0.5B-Instruct & distilgpt2 & 0.8000 & 0.6667 & 1.0000 & 1.0000 \\
+Linear SVM & Human + Qwen2.5-0.5B-Instruct & gpt2 & 0.8613 & 0.7973 & 0.9365 & 0.9759 \\
+Linear SVM & Human + Qwen2.5-0.5B-Instruct & Human (in-dist.) & 0.9614 & 0.9688 & 0.9542 & 0.9932 \\
+Linear SVM & Human + distilgpt2 & Qwen2.5-0.5B-Instruct & 0.7874 & 0.6757 & 0.9434 & 0.9523 \\
+Linear SVM & Human + distilgpt2 & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+Linear SVM & Human + distilgpt2 & gpt2 & 0.8507 & 0.7703 & 0.9500 & 0.9721 \\
+Linear SVM & Human + distilgpt2 & Human (in-dist.) & 0.9627 & 0.9673 & 0.9582 & 0.9932 \\
+Linear SVM & Human + gpt2 & Qwen2.5-0.5B-Instruct & 0.7907 & 0.6892 & 0.9273 & 0.9556 \\
+Linear SVM & Human + gpt2 & distilgpt2 & 0.8750 & 0.7778 & 1.0000 & 1.0000 \\
+Linear SVM & Human + gpt2 & gpt2 & 0.8936 & 0.8514 & 0.9403 & 0.9781 \\
+Linear SVM & Human + gpt2 & Human (in-dist.) & 0.9617 & 0.9680 & 0.9555 & 0.9931 \\
+Linear SVM & Leave-one-generator-out & Qwen2.5-0.5B-Instruct & 0.7907 & 0.6892 & 0.9273 & 0.9549 \\
+Linear SVM & Leave-one-generator-out & distilgpt2 & 0.9412 & 0.8889 & 1.0000 & 1.0000 \\
+Linear SVM & Leave-one-generator-out & gpt2 & 0.8777 & 0.8243 & 0.9385 & 0.9759 \\
+\bottomrule
+\end{tabular}
